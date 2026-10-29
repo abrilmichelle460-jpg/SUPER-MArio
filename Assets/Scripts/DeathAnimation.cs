@@ -1,3 +1,4 @@
+
 using System.Collections;
 using UnityEngine;
 
@@ -25,32 +26,63 @@ public class DeathAnimation : MonoBehaviour
 
     private void UpdateSprite()
     {
+        if (spriteRenderer == null)
+        {
+            spriteRenderer = GetComponent<SpriteRenderer>();
+        }
+
+        if (spriteRenderer == null)
+        {
+            Debug.LogError(
+                "DeathAnimation necesita un SpriteRenderer.",
+                this
+            );
+            return;
+        }
+
         spriteRenderer.enabled = true;
         spriteRenderer.sortingOrder = 10;
 
-        if (deadSprite != null) {
+        if (deadSprite != null)
+        {
             spriteRenderer.sprite = deadSprite;
         }
     }
 
     private void DisablePhysics()
     {
+        // Desactivar todos los colliders del objeto.
         Collider2D[] colliders = GetComponents<Collider2D>();
 
-        foreach (Collider2D collider in colliders) {
-            collider.enabled = false;
+        foreach (Collider2D item in colliders)
+        {
+            item.enabled = false;
         }
 
-        GetComponent<Rigidbody2D>().isKinematic = true;
+        // Reemplazo de isKinematic, obsoleto en Unity 6.
+        Rigidbody2D rb = GetComponent<Rigidbody2D>();
 
-        PlayerMovement playerMovement = GetComponent<PlayerMovement>();
-        EntityMovement entityMovement = GetComponent<EntityMovement>();
+        if (rb != null)
+        {
+            rb.linearVelocity = Vector2.zero;
+            rb.angularVelocity = 0f;
+            rb.bodyType = RigidbodyType2D.Kinematic;
+        }
 
-        if (playerMovement != null) {
+        // Desactivar los movimientos normales.
+        PlayerMovement playerMovement =
+            GetComponent<PlayerMovement>();
+
+        EntityMovement entityMovement =
+            GetComponent<EntityMovement>();
+
+        if (playerMovement != null)
+        {
             playerMovement.enabled = false;
         }
 
-        if (entityMovement != null) {
+        if (entityMovement != null)
+        {
             entityMovement.enabled = false;
         }
     }
@@ -68,10 +100,12 @@ public class DeathAnimation : MonoBehaviour
         while (elapsed < duration)
         {
             transform.position += velocity * Time.deltaTime;
+
             velocity.y += gravity * Time.deltaTime;
+
             elapsed += Time.deltaTime;
+
             yield return null;
         }
     }
-
 }

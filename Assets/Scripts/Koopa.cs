@@ -1,3 +1,4 @@
+
 using UnityEngine;
 
 public class Koopa : MonoBehaviour
@@ -14,11 +15,19 @@ public class Koopa : MonoBehaviour
         {
             Player player = collision.gameObject.GetComponent<Player>();
 
-            if (player.starpower) {
+            if (player == null)
+                return;
+
+            if (player.starpower)
+            {
                 Hit();
-            } else if (collision.transform.DotTest(transform, Vector2.down)) {
+            }
+            else if (collision.transform.DotTest(transform, Vector2.down))
+            {
                 EnterShell();
-            }  else {
+            }
+            else
+            {
                 player.Hit();
             }
         }
@@ -30,21 +39,32 @@ public class Koopa : MonoBehaviour
         {
             if (!pushed)
             {
-                Vector2 direction = new Vector2(transform.position.x - other.transform.position.x, 0f);
+                Vector2 direction = new Vector2(
+                    transform.position.x - other.transform.position.x,
+                    0f
+                );
+
                 PushShell(direction);
             }
             else
             {
                 Player player = other.GetComponent<Player>();
 
-                if (player.starpower) {
+                if (player == null)
+                    return;
+
+                if (player.starpower)
+                {
                     Hit();
-                } else {
+                }
+                else
+                {
                     player.Hit();
                 }
             }
         }
-        else if (!shelled && other.gameObject.layer == LayerMask.NameToLayer("Shell"))
+        else if (!shelled &&
+                 other.gameObject.layer == LayerMask.NameToLayer("Shell"))
         {
             Hit();
         }
@@ -55,36 +75,59 @@ public class Koopa : MonoBehaviour
         shelled = true;
 
         GetComponent<SpriteRenderer>().sprite = shellSprite;
-        GetComponent<AnimatedSprite>().enabled = false;
-        GetComponent<EntityMovement>().enabled = false;
+
+        AnimatedSprite animatedSprite = GetComponent<AnimatedSprite>();
+        if (animatedSprite != null)
+            animatedSprite.enabled = false;
+
+        EntityMovement movement = GetComponent<EntityMovement>();
+        if (movement != null)
+            movement.enabled = false;
     }
 
     private void PushShell(Vector2 direction)
     {
         pushed = true;
 
-        GetComponent<Rigidbody2D>().isKinematic = false;
+        Rigidbody2D rb = GetComponent<Rigidbody2D>();
+        if (rb != null)
+        {
+            rb.bodyType = RigidbodyType2D.Dynamic;
+        }
 
         EntityMovement movement = GetComponent<EntityMovement>();
-        movement.direction = direction.normalized;
-        movement.speed = shellSpeed;
-        movement.enabled = true;
 
-        gameObject.layer = LayerMask.NameToLayer("Shell");
+        if (movement != null)
+        {
+            movement.direction = direction.normalized;
+            movement.speed = shellSpeed;
+            movement.enabled = true;
+        }
+
+        int shellLayer = LayerMask.NameToLayer("Shell");
+
+        if (shellLayer >= 0)
+            gameObject.layer = shellLayer;
     }
 
     private void Hit()
     {
-        GetComponent<AnimatedSprite>().enabled = false;
-        GetComponent<DeathAnimation>().enabled = true;
+        AnimatedSprite animatedSprite = GetComponent<AnimatedSprite>();
+
+        if (animatedSprite != null)
+            animatedSprite.enabled = false;
+
+        DeathAnimation deathAnimation = GetComponent<DeathAnimation>();
+
+        if (deathAnimation != null)
+            deathAnimation.enabled = true;
+
         Destroy(gameObject, 3f);
     }
 
     private void OnBecameInvisible()
     {
-        if (pushed) {
+        if (pushed)
             Destroy(gameObject);
-        }
     }
-
 }

@@ -1,3 +1,4 @@
+
 using System.Collections;
 using UnityEngine;
 
@@ -10,12 +11,28 @@ public class BlockItem : MonoBehaviour
 
     private IEnumerator Animate()
     {
-        Rigidbody2D rigidbody = GetComponent<Rigidbody2D>();
+        Rigidbody2D rb = GetComponent<Rigidbody2D>();
         CircleCollider2D physicsCollider = GetComponent<CircleCollider2D>();
         BoxCollider2D triggerCollider = GetComponent<BoxCollider2D>();
         SpriteRenderer spriteRenderer = GetComponent<SpriteRenderer>();
 
-        rigidbody.isKinematic = true;
+        // Comprobar que los componentes necesarios existen.
+        if (rb == null ||
+            physicsCollider == null ||
+            triggerCollider == null ||
+            spriteRenderer == null)
+        {
+            Debug.LogError(
+                "BlockItem necesita Rigidbody2D, CircleCollider2D, " +
+                "BoxCollider2D y SpriteRenderer.",
+                this
+            );
+
+            yield break;
+        }
+
+        // Desactivar física y colisiones durante la animación.
+        rb.bodyType = RigidbodyType2D.Kinematic;
         physicsCollider.enabled = false;
         triggerCollider.enabled = false;
         spriteRenderer.enabled = false;
@@ -28,21 +45,28 @@ public class BlockItem : MonoBehaviour
         float duration = 0.5f;
 
         Vector3 startPosition = transform.position;
-        Vector3 endPosition = transform.position + Vector3.up;
+        Vector3 endPosition = startPosition + Vector3.up;
 
         while (elapsed < duration)
         {
             float t = elapsed / duration;
 
-            transform.position = Vector3.Lerp(startPosition, endPosition, t);
-            elapsed += Time.deltaTime;
+            transform.position = Vector3.Lerp(
+                startPosition,
+                endPosition,
+                t
+            );
 
+            elapsed += Time.deltaTime;
             yield return null;
         }
 
-        rigidbody.isKinematic = false;
+        // Asegurar la posición final exacta.
+        transform.position = endPosition;
+
+        // Restaurar la física y las colisiones.
+        rb.bodyType = RigidbodyType2D.Dynamic;
         physicsCollider.enabled = true;
         triggerCollider.enabled = true;
     }
-
 }
