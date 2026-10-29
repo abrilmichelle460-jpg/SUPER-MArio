@@ -9,8 +9,6 @@ public class GameManager : MonoBehaviour
     public int stage { get; private set; }
     public int lives { get; private set; }
     public int coins { get; private set; }
-    public string pendingLevel { get; private set; }
-    public bool awaitingNextLevel => !string.IsNullOrEmpty(pendingLevel);
 
     private void Awake()
     {
@@ -33,16 +31,7 @@ public class GameManager : MonoBehaviour
     {
         Application.targetFrameRate = 60;
 
-        lives = 3;
-        coins = 0;
-        string[] current = SceneManager.GetActiveScene().name.Split('-');
-        if (current.Length == 2 && int.TryParse(current[0], out int currentWorld) &&
-            int.TryParse(current[1], out int currentStage)) {
-            world = currentWorld;
-            stage = currentStage;
-        } else {
-            NewGame();
-        }
+        NewGame();
     }
 
     public void NewGame()
@@ -62,18 +51,10 @@ public class GameManager : MonoBehaviour
 
     public void LoadLevel(int world, int stage)
     {
-        string sceneName = $"{world}-{stage}";
-        if (!Application.CanStreamedLevelBeLoaded(sceneName)) {
-            pendingLevel = sceneName;
-            return;
-        }
-
-        CancelInvoke();
-        pendingLevel = null;
         this.world = world;
         this.stage = stage;
 
-        SceneManager.LoadScene(sceneName);
+        SceneManager.LoadScene($"{world}-{stage}");
     }
 
     public void NextLevel()

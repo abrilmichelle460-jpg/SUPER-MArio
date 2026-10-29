@@ -9,7 +9,6 @@ public class SideScrolling : MonoBehaviour
     public float height = 6.5f;
     public float undergroundHeight = -9.5f;
     public float undergroundThreshold = 0f;
-    public float maximumX = 10000f;
 
     private void Awake()
     {
@@ -21,7 +20,7 @@ public class SideScrolling : MonoBehaviour
     {
         // track the player moving to the right
         Vector3 cameraPosition = transform.position;
-        cameraPosition.x = Mathf.Min(maximumX, Mathf.Max(cameraPosition.x, player.position.x));
+        cameraPosition.x = Mathf.Max(cameraPosition.x, player.position.x);
         transform.position = cameraPosition;
     }
 

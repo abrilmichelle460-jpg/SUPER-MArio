@@ -9,13 +9,11 @@ public class FlagPole : MonoBehaviour
     public float speed = 6f;
     public int nextWorld = 1;
     public int nextStage = 1;
-    private bool completing;
 
     private void OnTriggerEnter2D(Collider2D other)
     {
-        if (!completing && other.CompareTag("Player"))
+        if (other.CompareTag("Player"))
         {
-            completing = true;
             StartCoroutine(MoveTo(flag, poleBottom.position));
             StartCoroutine(LevelCompleteSequence(other.transform));
         }
@@ -34,11 +32,7 @@ public class FlagPole : MonoBehaviour
 
         yield return new WaitForSeconds(2f);
 
-        if (nextWorld == 1 && nextStage == 1) {
-            GameManager.Instance.NextLevel();
-        } else {
-            GameManager.Instance.LoadLevel(nextWorld, nextStage);
-        }
+        GameManager.Instance.LoadLevel(nextWorld, nextStage);
     }
 
     private IEnumerator MoveTo(Transform subject, Vector3 position)
